@@ -1,0 +1,6 @@
+# JS Stuff
+node_modules/
+
+# OS Stuff
+.DS_Store
+Thumbs.db
