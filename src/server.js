@@ -20,6 +20,7 @@ const sendResponse = (handler, request, response) => {
 
 const create = (handler, options = {}) => {
   const server = http.createServer((request, response) => {
+    request.context = {}
     const method = request.method
     if (method === 'POST') {
       let body = ''
