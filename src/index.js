@@ -1,6 +1,7 @@
 const Server = require('./server')
+const Routes = require('./routes')
 
-const handler = request => ({
+const handler = request => ({ // eslint-disable-line
   code: 200,
   headers: { 'Content-Type': 'application/json' },
   body: 'hello world!'
@@ -13,30 +14,40 @@ const stringifyBody = handler => request => {
   return newValue
 }
 
-const allRoutes = routes({
-  '/users': get(handleUsers),
-  '/user/:id': {
-    '/': post(handleUser),
-    '/posts': post(handleUserPosts),
-    '/post/:id': post(handleUserPost)
-  },
-  '/products': get(handleProducts),
-  '/product/:id': get(handleProduct),
-  'not-found': handleNotFound
+const handleUsers = handler
+const handleUser = handler
+const handleUserPosts = handler
+const handleUserPost = handler
+const handleGetProduct = handler
+const handlePostProduct = handler
+const handleProducts = handler
+const handleNotFound = request => ({ // eslint-disable-line
+  code: 404,
+  headers: {},
+  body: 'None'
 })
 
-const allRoutes = routes(
-  get('/users', handleUsers),
-  context('/user/:id',
-    post('/', handleUser),
-    post('/posts', handleUserPosts),
-    post('/post/:id', handleUserPost)
-  ),
-  get('/products', handleProducts),
-  get('/product/:id', handleProduct),
-  notFound(handleNotFound)
-)
+const productRoutes = Routes.routes([
+  Routes.get('/', handleGetProduct),
+  Routes.post('/', handlePostProduct)
+])
 
+const allRoutes = Routes.routes([
+  Routes.get('/', handler),
+  Routes.get('/users', handleUsers),
+  Routes.get('/test/test', handler),
+  Routes.context('/user/:id', [
+    Routes.get('/', handler),
+    Routes.post('/', handleUser),
+    Routes.post('/posts', handleUserPosts),
+    Routes.post('/post/:id', handleUserPost)
+  ]),
+  Routes.context('/product/:id', productRoutes),
+  Routes.get('/products', handleProducts),
+  Routes.notFound(handleNotFound)
+])
+
+// eslint-disable-next-line
 const server = Server.create(
   stringifyBody(allRoutes)
 )
