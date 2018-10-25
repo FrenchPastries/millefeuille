@@ -4,3 +4,6 @@ node_modules/
 # OS Stuff
 .DS_Store
 Thumbs.db
+
+# Yarn stuff
+yarn-error.log
