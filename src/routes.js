@@ -1,12 +1,10 @@
-const { debugMap } = require('./helpers')
-
 const getRouteSegments = route => route.split('/').slice(1)
 
-const addHandler = (segments, pathSegments, handler) => {
-  if (pathSegments.length === 0) {
+const addHandler = (segments, urlSegments, handler) => {
+  if (urlSegments.length === 0) {
     return handler
   } else {
-    const part = pathSegments[0]
+    const part = urlSegments[0]
     if (part.startsWith(':')) {
       const global_ = segments.global || {}
       segments = {}
@@ -14,7 +12,7 @@ const addHandler = (segments, pathSegments, handler) => {
         name: part.slice(1),
         handler: addHandler(
           global_,
-          pathSegments.slice(1),
+          urlSegments.slice(1),
           handler
         )
       }
@@ -22,7 +20,7 @@ const addHandler = (segments, pathSegments, handler) => {
       const handlerPart = segments[part] || {}
       segments[part] = addHandler(
         handlerPart,
-        pathSegments.slice(1),
+        urlSegments.slice(1),
         handler
       )
     }
@@ -73,62 +71,67 @@ const createRouterHash = (acc, { method, route, handler }) => {
 //   }
 // }
 
-const getHandlerWithMethod = (allHandlers, request, pathSegments) => {
-  console.log(pathSegments)
+const getHandlerWithMethod = (allHandlers, request, urlSegments) => {
+  console.log(urlSegments)
   console.log(allHandlers)
   if (typeof allHandlers === 'function') {
     return allHandlers
   }
 
-  if (pathSegments.length === 0) {
+  if (urlSegments.length === 0) {
     return allHandlers
   }
 
-  const value = pathSegments[0]
+  const value = urlSegments[0]
   const globalMatcher = allHandlers.global
   if (globalMatcher) {
     request.context[globalMatcher.name] = value
-    return getHandlerWithMethod(allHandlers.global.handler, request, pathSegments.slice(1))
+    return getHandlerWithMethod(allHandlers.global.handler, request, urlSegments.slice(1))
   } else {
     if (allHandlers[value]) {
-      return getHandlerWithMethod(allHandlers[value], request, pathSegments.slice(1))
+      return getHandlerWithMethod(allHandlers[value], request, urlSegments.slice(1))
     } else {
       return null
     }
   }
 }
 
-const getHandler = (request, pathSegments, routesHash) => {
-  console.log('start')
-  const getHandler = getHandlerWithMethod(
-    routesHash[request.method] || {},
-    request,
-    pathSegments
-  )
-  console.log('between')
+const getHandler = (request, urlSegments, routesHash) => {
   const anyHandler = getHandlerWithMethod(
     routesHash['ANY'] || {},
     request,
-    pathSegments
+    urlSegments
   )
-  console.log('end')
-  return getHandler || anyHandler
+  return anyHandler || getHandlerWithMethod(
+    routesHash[request.method] || {},
+    request,
+    urlSegments
+  )
 }
 
 const routeRequest = routesHash => request => {
-  const pathSegments = getRouteSegments(request.url)
-  // const pathSegmentsSegment = routesHash[request.method]
-  // console.log(pathSegments)
+  const urlSegments = getRouteSegments(request.url)
   console.log(routesHash)
-  const handler = getHandler(request, pathSegments, routesHash)
-  // console.log(request)
+  const handler = getHandler(request, urlSegments, routesHash)
   console.log(handler)
   if (typeof handler === 'function') {
-    return handler(request)
+    const response = handler(request)
+    if (!response) {
+      if (routesHash['NOT_FOUND']) {
+        return routesHash['NOT_FOUND'](request)
+      } else {
+        return response
+      }
+    }
   } else if (handler) {
     return handler[''](request)
   } else {
-    return routesHash('NOT_FOUND')(request)
+
+    if (routesHash['NOT_FOUND']) {
+      return routesHash['NOT_FOUND'](request)
+    } else {
+      return null
+    }
   }
 }
 
