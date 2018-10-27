@@ -4,16 +4,16 @@ const selectPort = (options = {}) => process.env.PORT || options.port || 8080
 
 const sendResponse = (handler, request, response) => {
   Promise.resolve(handler(request))
-    .then(({ headers, body, code }) => {
-      response.statusCode = code
+    .then(({ headers, body, statusCode }) => {
+      response.statusCode = statusCode
       Object
         .keys(headers)
         .map(key => response.setHeader(key, headers[key]))
       response.write(body)
       response.end()
     })
-    .catch(({ code }) => {
-      response.statusCode = code
+    .catch(({ statusCode }) => {
+      response.statusCode = statusCode
       response.end()
     })
 }
