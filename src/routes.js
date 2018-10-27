@@ -1,3 +1,6 @@
+const http = require('./http')
+const helpers = require('./helpers')
+
 const getRouteSegments = route => route.split('/').slice(1)
 
 const addHandler = (segments, urlSegments, handler) => {
@@ -6,15 +9,10 @@ const addHandler = (segments, urlSegments, handler) => {
   } else {
     const part = urlSegments[0]
     if (part.startsWith(':')) {
-      const global_ = segments.global || {}
       segments = {}
       segments.global = {
         name: part.slice(1),
-        handler: addHandler(
-          global_,
-          urlSegments.slice(1),
-          handler
-        )
+        handler: handler
       }
     } else {
       const handlerPart = segments[part] || {}
@@ -29,7 +27,7 @@ const addHandler = (segments, urlSegments, handler) => {
 }
 
 const selectHandler = (method, methodHandlers, route, handler) => {
-  if (method === 'NOT_FOUND') {
+  if (method === http.request.types.NOT_FOUND) {
     return handler
   } else {
     const routeSegments = getRouteSegments(route)
@@ -53,108 +51,73 @@ const createRouterHash = (acc, { method, route, handler }) => {
   return acc
 }
 
-// const getHandler = request => {
-//   const globalMatcher = acc.global
-//   if (globalMatcher) {
-//     request.context[globalMatcher.name] = value
-//     return acc.global.handler
-//   } else {
-//     if (acc[value]) {
-//       return acc[value]
-//     } else {
-//       if (acc['ANY']) {
-//         return acc['ANY']
-//       } else {
-//         return null
-//       }
-//     }
-//   }
-// }
-
-const getHandlerWithMethod = (allHandlers, request, urlSegments) => {
-  console.log(urlSegments)
-  console.log(allHandlers)
-  if (typeof allHandlers === 'function') {
+const getHandlerWithMethod = (allHandlers, request) => {
+  helpers.debug('Enter in getHandlerWithMethod')
+  if (typeof allHandlers === 'function' || request.routeSegments.length === 0) {
     return allHandlers
   }
 
-  if (urlSegments.length === 0) {
-    return allHandlers
-  }
-
-  const value = urlSegments[0]
+  const value = request.routeSegments.shift()
   const globalMatcher = allHandlers.global
   if (globalMatcher) {
     request.context[globalMatcher.name] = value
-    return getHandlerWithMethod(allHandlers.global.handler, request, urlSegments.slice(1))
+    return getHandlerWithMethod(allHandlers.global.handler, request)
   } else {
     if (allHandlers[value]) {
-      return getHandlerWithMethod(allHandlers[value], request, urlSegments.slice(1))
+      return getHandlerWithMethod(allHandlers[value], request)
     } else {
       return null
     }
   }
 }
 
-const getHandler = (request, urlSegments, routesHash) => {
+const getHandler = (request, routesSwitch) => {
+  helpers.debug('Enter getHandler')
+  const routeSegments = request.routeSegments.slice(0)
   const anyHandler = getHandlerWithMethod(
-    routesHash['ANY'] || {},
-    request,
-    urlSegments
+    routesSwitch[http.request.types.ANY] || {},
+    request
   )
-  return anyHandler || getHandlerWithMethod(
-    routesHash[request.method] || {},
-    request,
-    urlSegments
-  )
-}
-
-const routeRequest = routesHash => request => {
-  const urlSegments = getRouteSegments(request.url)
-  console.log(routesHash)
-  const handler = getHandler(request, urlSegments, routesHash)
-  console.log(handler)
-  if (typeof handler === 'function') {
-    const response = handler(request)
-    if (!response) {
-      if (routesHash['NOT_FOUND']) {
-        return routesHash['NOT_FOUND'](request)
-      } else {
-        return response
-      }
-    }
-  } else if (handler) {
-    return handler[''](request)
+  if (anyHandler) {
+    return anyHandler
   } else {
-
-    if (routesHash['NOT_FOUND']) {
-      return routesHash['NOT_FOUND'](request)
-    } else {
-      return null
-    }
+    request.routeSegments = routeSegments
+    return getHandlerWithMethod(
+      routesSwitch[request.method] || {},
+      request
+    )
   }
 }
 
-// routes : [ Route ] => Handler
-const routes = routes => {
-  const routesHash = routes.reduce(createRouterHash, {})
-  // console.log(routesHash)
-  console.log(routesHash)
-  return routeRequest(routesHash)
+const responseOrNotFound = (routesSwitch, request, response) => {
+  helpers.debug('Enter responseOrNotFound')
+  if (!response && routesSwitch[http.request.types.NOT_FOUND]) {
+    return routesSwitch[http.request.types.NOT_FOUND](request)
+  } else {
+    return response
+  }
 }
 
-// Path = { segment : Handler | Path }
-// paths = { HttpType : Path }
+const routeRequest = routesSwitch => request => {
+  helpers.debug('Enter routeRequest')
+  request.routeSegments = request.routeSegments || getRouteSegments(addTrailingSlash(request.url))
+  const handler = getHandler(request, routesSwitch)
+  if (handler) {
+    if (request.routeSegments.length === 0) {
+      delete request.routeSegments
+    }
+    const response = handler(request)
+    return responseOrNotFound(routesSwitch, request, response)
+  } else {
+    return responseOrNotFound(routesSwitch, request, null)
+  }
+}
 
-// HttpType = GET | POST | PATCH | PUT | DELETE | OPTIONS | ANY
-
-// Handler = Request => Response
-
-// Route = {
-//   method : HttpType,
-//   route : URL,
-//   handler : Handler
-// }
+const routes = allRoutes => {
+  const routesSwitch = allRoutes.reduce(createRouterHash, {})
+  helpers.debug(routesSwitch)
+  return routeRequest(routesSwitch)
+}
 
 const addTrailingSlash = route => {
   if (route.length > 1) {
@@ -168,42 +131,29 @@ const addTrailingSlash = route => {
   }
 }
 
-// matcher : HttpType => (URL, Handler) -> Route
 const matcher = method => (route, handler) => ({
   method: method,
   route: addTrailingSlash(route),
   handler: handler
 })
 
-// x : (URL, Handler) => Route
-const get = matcher('GET')
-const post = matcher('POST')
-const patch = matcher('PATCH')
-const put = matcher('PUT')
-const del = matcher('DELETE')
-const options = matcher('OPTIONS') // eslint-disable-line
-const any = matcher('ANY')
+const get = matcher(http.request.types.GET)
+const post = matcher(http.request.types.POST)
+const patch = matcher(http.request.types.PATCH)
+const put = matcher(http.request.types.PUT)
+const del = matcher(http.request.types.DELETE)
+const options = matcher(http.request.types.OPTIONS)
+const any = matcher(http.request.types.ANY)
 
-// notFound : Handler => Route
 const notFound = handler => ({
-  method: 'NOT_FOUND',
+  method: http.request.types.NOT_FOUND,
   handler: handler
 })
 
-// context : (URL, [ Route ] | Handler) => Route
 const context = (endpoint, routesOrHandler) => {
   switch (typeof routesOrHandler) {
     case 'function': return any(endpoint, routesOrHandler)
-    case 'object': return any(endpoint,
-      routes(
-        routesOrHandler
-          .map(elem => {
-            elem.route = addTrailingSlash(`${endpoint}${elem.route}`)
-            return elem
-          })
-          // .map(debugMap)
-      )
-    )
+    case 'object': return any(endpoint, routes(routesOrHandler))
     default: throw 'Context Error'
   }
 }
@@ -216,6 +166,7 @@ module.exports = {
   patch,
   put,
   del,
+  options,
   any,
   notFound
 }
