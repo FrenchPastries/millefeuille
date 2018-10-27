@@ -1,10 +1,10 @@
 const Server = require('./server')
 const Routes = require('./routes')
 
-const handler = request => ({ // eslint-disable-line
-  code: 200,
+const handler = content => request => ({ // eslint-disable-line
+  statusCode: 200,
   headers: { 'Content-Type': 'application/json' },
-  body: 'hello world!'
+  body: `hello world! ${content}`
 })
 
 const stringifyBody = handler => request => {
@@ -14,15 +14,15 @@ const stringifyBody = handler => request => {
   return newValue
 }
 
-const handleUsers = handler
-const handleUser = handler
-const handleUserPosts = handler
-const handleUserPost = handler
-const handleGetProduct = handler
-const handlePostProduct = handler
-const handleProducts = handler
+const handleUsers = handler('users')
+// const handleUser = handler('user')
+const handleUserPosts = handler('usersPosts')
+const handleUserPost = handler('userPost')
+const handleGetProduct = handler('getProduct')
+const handlePostProduct = handler('postProduct')
+const handleProducts = handler('products')
 const handleNotFound = request => ({ // eslint-disable-line
-  code: 404,
+  statusCode: 404,
   headers: {},
   body: 'None'
 })
@@ -32,13 +32,19 @@ const productRoutes = Routes.routes([
   Routes.post('/', handlePostProduct)
 ])
 
+const handlerContext = () => ({
+  statusCode: 200,
+  headers: {},
+  body: 'Hello context!'
+})
+
 const allRoutes = Routes.routes([
-  Routes.get('/', handler),
+  Routes.get('/', handler('root')),
   Routes.get('/users', handleUsers),
-  Routes.get('/test/test', handler),
+  Routes.get('/test/test', handler('test')),
   Routes.context('/user/:id', [
-    Routes.get('/', handler),
-    Routes.post('/', handleUser),
+    Routes.get('/', handlerContext),
+    Routes.post('/', handlerContext),
     Routes.post('/posts', handleUserPosts),
     Routes.post('/post/:id', handleUserPost)
   ]),
