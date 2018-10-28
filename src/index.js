@@ -1,61 +1,42 @@
-const Server = require('./server')
-const Routes = require('./routes')
+const http = require('http')
 
-const handler = content => request => ({ // eslint-disable-line
-  statusCode: 200,
-  headers: { 'Content-Type': 'application/json' },
-  body: `hello world! ${content}`
-})
+const selectPort = (options = {}) => process.env.PORT || options.port || 8080
 
-const stringifyBody = handler => request => {
-  const value = handler(request)
-  const newValue = Object.assign({}, value)
-  newValue.body = JSON.stringify(value.body)
-  return newValue
+const sendResponse = (handler, request, response) => {
+  Promise.resolve(handler(request))
+    .then(({ headers, body, statusCode }) => {
+      response.statusCode = statusCode
+      Object
+        .keys(headers)
+        .map(key => response.setHeader(key, headers[key]))
+      response.write(body)
+      response.end()
+    })
+    .catch(({ statusCode }) => {
+      response.statusCode = statusCode
+      response.end()
+    })
 }
 
-const handleUsers = handler('users')
-// const handleUser = handler('user')
-const handleUserPosts = handler('usersPosts')
-const handleUserPost = handler('userPost')
-const handleGetProduct = handler('getProduct')
-const handlePostProduct = handler('postProduct')
-const handleProducts = handler('products')
-const handleNotFound = request => ({ // eslint-disable-line
-  statusCode: 404,
-  headers: {},
-  body: 'None'
-})
+const create = (handler, options = {}) => {
+  const server = http.createServer((request, response) => {
+    request.context = {}
+    const method = request.method
+    if (method === 'POST') {
+      let body = ''
+      request.on('data', chunk => body += chunk.toString())
+      request.on('end', () => {
+        request.body = body
+        sendResponse(handler, request, response)
+      })
+    } else {
+      sendResponse(handler, request, response)
+    }
+  })
+  server.listen(selectPort(options))
+  return server
+}
 
-const productRoutes = Routes.routes([
-  Routes.get('/', handleGetProduct),
-  Routes.post('/', handlePostProduct)
-])
-
-const handlerContext = () => ({
-  statusCode: 200,
-  headers: {},
-  body: 'Hello context!'
-})
-
-const allRoutes = Routes.routes([
-  Routes.get('/', handler('root')),
-  Routes.get('/users', handleUsers),
-  Routes.get('/test/test', handler('test')),
-  Routes.context('/user/:id', [
-    Routes.get('/', handlerContext),
-    Routes.post('/', handlerContext),
-    Routes.post('/posts', handleUserPosts),
-    Routes.post('/post/:id', handleUserPost)
-  ]),
-  Routes.context('/product/:id', productRoutes),
-  Routes.get('/products', handleProducts),
-  Routes.notFound(handleNotFound)
-])
-
-// eslint-disable-next-line
-const server = Server.create(
-  stringifyBody(allRoutes)
-)
-
-console.log(`Server Started on port: 8080`)
+module.exports = {
+  create
+}

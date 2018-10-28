@@ -1,8 +1,0 @@
-module.exports.GET = 'GET'
-module.exports.ANY = 'ANY'
-module.exports.POST = 'POST'
-module.exports.PATCH = 'PATCH'
-module.exports.PUT = 'PUT'
-module.exports.DELETE = 'DELETE'
-module.exports.OPTIONS = 'OPTIONS'
-module.exports.NOT_FOUND = 'NOT_FOUND'
