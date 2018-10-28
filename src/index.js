@@ -6,10 +6,14 @@ const sendResponse = (handler, request, response) => {
   Promise.resolve(handler(request))
     .then(({ headers, body, statusCode }) => {
       response.statusCode = statusCode
-      Object
+      if (headers) {
+        Object
         .keys(headers)
         .map(key => response.setHeader(key, headers[key]))
-      response.write(body)
+      }
+      if (body) {
+        response.write(body)
+      }
       response.end()
     })
     .catch(({ statusCode }) => {
