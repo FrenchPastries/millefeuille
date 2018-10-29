@@ -7,17 +7,28 @@
   "license": "MIT",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "SERVER_ENV=development nodemon src/index.js"
+    "dev": "SERVER_ENV=development nodemon src/index.js",
+    "prepublish": "generate-export-aliases"
   },
   "dependencies": {},
   "devDependencies": {
     "eslint": "^5.7.0",
+    "generate-export-aliases": "^1.1.0",
     "nodemon": "^1.18.5"
   },
+  "config": {
+    "exportAliases": {
+      "requests": "./src/requests.js"
+    }
+  },
+  "files": [
+    "/src/index.js",
+    "/requests.js"
+  ],
   "eslintConfig": {
     "extends": "eslint:recommended",
     "parserOptions": {
-      "ecmaVersion": 6,
+      "ecmaVersion": 9,
       "sourceType": "module"
     },
     "env": {
