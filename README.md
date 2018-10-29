@@ -98,6 +98,41 @@ MilleFeuille.create(
 
 If you never saw `...`, it's the spread operator, used to smartly merge two objects together.
 
+# Asynchronous handling
+
+Ready to use out of the box, MilleFeuille handle asynchronous handler also! Just give a Promise as a response in the handler, and MilleFeuille will handle it for you!
+
+```javascript
+const MilleFeuille = require('@frenchpastries/millefeuille')
+
+const asynchronousHandler = request => Promise.resolve({
+  statusCode: 200,
+  body: 'Hello World from asynchronous MilleFeuille!'
+})
+
+MilleFeuille.create(asynchronousHandler)
+```
+
+Try to reach `localhost:8080`, and you'll see your answer! Under the hood, MilleFeuille open your Promise, and search for a Response object whether the Promise is successful or not to send it as response!
+
+# Crafting responses easily
+
+Crafting a response for every handler could be painful. That's why MilleFeuille provides helpers inside `@frenchpastries/millefeuille/requests`. This contains right now five functions to help deal with responses.
+
+- `response(body)`, returns a 200 response, generating a correct response with a content equal to body.
+- `redirect(url)`, returns a 302 response, redirecting the user to the given url.
+- `badRequest(body)`, returns a 400 response, with the corresponding body.
+- `internalError(body)`, returns a 500 response, with the corresponding body.
+- `contentType(response, type)`, taking a response into parameter, and setting the Content-Type of the response in the headers to type.
+
+# Options handling
+
+Handling options with MilleFeuille is really easy. You can send an `options` object as the final object on the server, like `MilleFeuille.create(handler, options)`. In this object, you can precise a `port` variable, which will be used to listen to.
+
+# Port handling
+The server will try to listen on `options.port` if an options is provided and contains a `port` variable. If it is unavailable, it will try to listen on `process.env.PORT` (and this is out of the box compatible with a hosting service like Heroku). Finally, it will try to listen on 8080.  
+To simply set a `PORT` environment variable, you can use `dotenv` to load a `.env` at your roots when launching the app and populating the `process.env` variable. 
+
 # Last details
 
 You know practically everything you need to use MilleFeuille! One last thing though. The response provided by handlers is an object with `statusCode`, `headers` and `body` keys. But you can omit `headers` and `body` safely, MilleFeuille is able to handle it without errors: if they're present, they will be used. If they're not present, then MilleFeuille will just respond to requests without headers or body.
