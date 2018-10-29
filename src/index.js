@@ -1,6 +1,6 @@
 const http = require('http')
 
-const selectPort = (options = {}) => process.env.PORT || options.port || 8080
+const selectPort = (options = {}) => options.port || process.env.PORT || 8080
 
 const sendResponse = (handler, request, response) => {
   Promise.resolve(handler(request))
