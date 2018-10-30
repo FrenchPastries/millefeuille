@@ -12,6 +12,9 @@ Getting started with MilleFeuille is simple and easy.
 ```bash
 # For Yarn users
 yarn add @frenchpastries/millefeuille
+```
+
+```bash
 # For NPM users
 npm install --save @frenchpastries/millefeuille
 ```
@@ -123,7 +126,7 @@ Crafting a response for every handler could be painful. That's why MilleFeuille 
 - `redirect(url)`, returns a 302 response, redirecting the user to the given url.
 - `badRequest(body)`, returns a 400 response, with the corresponding body.
 - `internalError(body)`, returns a 500 response, with the corresponding body.
-- `contentType(response, type)`, taking a response into parameter, and generates a new response, with the corresponding Content-Type in the headers.
+- `contentType(response, type)`, taking a response into parameter, and generating a new response, with the corresponding Content-Type in the headers.
 
 # Options handling
 
