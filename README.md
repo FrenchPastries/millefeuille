@@ -117,13 +117,13 @@ Try to reach `localhost:8080`, and you'll see your answer! Under the hood, Mille
 
 # Crafting responses easily
 
-Crafting a response for every handler could be painful. That's why MilleFeuille provides helpers inside `@frenchpastries/millefeuille/requests`. This contains right now five functions to help deal with responses.
+Crafting a response for every handler could be painful. That's why MilleFeuille provides helpers inside `@frenchpastries/millefeuille/response`. This contains right now five functions to help deal with responses.
 
 - `response(body)`, returns a 200 response, generating a correct response with a content equal to body.
 - `redirect(url)`, returns a 302 response, redirecting the user to the given url.
 - `badRequest(body)`, returns a 400 response, with the corresponding body.
 - `internalError(body)`, returns a 500 response, with the corresponding body.
-- `contentType(response, type)`, taking a response into parameter, and setting the Content-Type of the response in the headers to type.
+- `contentType(response, type)`, taking a response into parameter, and generates a new response, with the corresponding Content-Type in the headers.
 
 # Options handling
 
@@ -131,7 +131,7 @@ Handling options with MilleFeuille is really easy. You can send an `options` obj
 
 # Port handling
 The server will try to listen on `options.port` if an options is provided and contains a `port` variable. If it is unavailable, it will try to listen on `process.env.PORT` (and this is out of the box compatible with a hosting service like Heroku). Finally, it will try to listen on 8080.  
-To simply set a `PORT` environment variable, you can use `dotenv` to load a `.env` at your roots when launching the app and populating the `process.env` variable. 
+To simply set a `PORT` environment variable, you can use `dotenv` to load a `.env` at your roots when launching the app and populating the `process.env` variable.
 
 # Last details
 

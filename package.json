@@ -18,12 +18,12 @@
   },
   "config": {
     "exportAliases": {
-      "requests": "./src/requests.js"
+      "response": "./src/response.js"
     }
   },
   "files": [
     "/src/index.js",
-    "/requests.js"
+    "/response.js"
   ],
   "eslintConfig": {
     "extends": "eslint:recommended",
