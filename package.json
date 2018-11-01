@@ -1,6 +1,6 @@
 {
   "name": "@frenchpastries/millefeuille",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "main": "src/index.js",
   "repository": "git@github.com:frenchpastries/millefeuille.git",
   "author": "Guillaume Hivert <guillaume.hivert@outlook.com>",
