@@ -1,4 +1,5 @@
 const http = require('http')
+const url = require('url')
 
 const selectPort = (options = {}) => options.port || process.env.PORT || 8080
 
@@ -25,6 +26,7 @@ const sendResponse = (handler, request, response) => {
 const create = (handler, options = {}) => {
   const server = http.createServer((request, response) => {
     request.context = {}
+    request.url = url.parse(request.url)
     const method = request.method
     if (method === 'POST') {
       let body = ''
