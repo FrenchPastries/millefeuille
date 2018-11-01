@@ -22,7 +22,7 @@
     }
   },
   "files": [
-    "/src/index.js",
+    "/src",
     "/response.js"
   ],
   "eslintConfig": {
