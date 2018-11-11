@@ -26,6 +26,11 @@ const badRequest = body => ({
   headers: {},
   body
 })
+
+const forbidden = body => ({
+  statusCode: 403,
+  headers: {},
+  body
 })
 
 const internalError = body => ({
@@ -39,5 +44,6 @@ module.exports = {
   contentType,
   redirect,
   badRequest,
+  forbidden,
   internalError
 }
