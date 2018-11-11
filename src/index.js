@@ -65,6 +65,9 @@ const create = (handler, options = {}) => {
   return server
 }
 
+const stop = server => server.close()
+
 module.exports = {
-  create
+  create,
+  stop
 }
