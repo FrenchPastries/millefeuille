@@ -10,3 +10,7 @@ Thumbs.db
 
 # Yarn stuff
 yarn-error.log
+
+# Test stuff
+coverage/
+.nyc*
