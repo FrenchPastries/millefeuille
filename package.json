@@ -8,7 +8,9 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "SERVER_ENV=development nodemon src/index.js",
-    "prepare": "generate-export-aliases"
+    "prepare": "generate-export-aliases",
+    "test": "mocha"
+  },
   },
   "dependencies": {},
   "devDependencies": {
