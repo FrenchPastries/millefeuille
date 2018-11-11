@@ -11,13 +11,13 @@
     "prepare": "generate-export-aliases",
     "test": "mocha"
   },
-  },
   "dependencies": {},
   "devDependencies": {
     "chai": "^4.2.0",
     "eslint": "^5.7.0",
     "generate-export-aliases": "^1.1.0",
     "mocha": "^5.2.0",
+    "node-fetch": "^2.2.1",
     "nodemon": "^1.18.5"
   },
   "config": {
