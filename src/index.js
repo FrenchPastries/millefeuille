@@ -1,44 +1,66 @@
 const http = require('http')
 const url = require('url')
 
-const selectPort = (options = {}) => options.port || process.env.PORT || 8080
+const utils = require('./response')
 
-const sendResponse = (handler, request, response) => {
-  Promise.resolve(handler(request))
-    .then(({ headers, body, statusCode }) => {
-      response.statusCode = statusCode
-      if (headers) {
-        Object
-        .keys(headers)
-        .map(key => response.setHeader(key, headers[key]))
-      }
-      if (body) {
-        response.write(body)
-      }
-      response.end()
-    })
-    .catch(({ statusCode }) => {
-      response.statusCode = statusCode
-      response.end()
-    })
+const setURL = request => request.url = url.parse(request.url)
+
+const extractBody = request => new Promise(resolve => {
+  let body = ''
+  request.on('data', chunk => body += chunk.toString())
+  request.on('end', () => {
+    request.body = body
+    resolve(request)
+  })
+})
+
+const internalErrorMessage = 'Internal Server Error. Please, contact your administrator.'
+
+const normalizeResponse = content => {
+  if (typeof content === 'string') {
+    return utils.internalError(content)
+  } else {
+    return {
+      statusCode: content.statusCode || 500,
+      headers: content.headers || {},
+      body: content.body || internalErrorMessage
+    }
+  }
 }
 
+const setHeaders = (response, headers) => {
+  const setHeader = key => response.setHeader(key, headers[key])
+  Object.keys(headers).forEach(setHeader)
+}
+
+const sendResponse = response => content => {
+  const { statusCode, headers, body } = normalizeResponse(content)
+  response.statusCode = statusCode
+  setHeaders(response, headers)
+  response.write(body)
+  response.end()
+}
+
+const handleResponse = (handler, request, response) => {
+  Promise.resolve(handler(request))
+    .then(sendResponse(response))
+    .catch(sendResponse(response))
+}
+
+const handleRequests = handler => (request, response) => {
+  setURL(request)
+  if (request.method === 'POST') {
+    extractBody(request)
+      .then(() => handleResponse(handler, request, response))
+  } else {
+    handleResponse(handler, request, response)
+  }
+}
+
+const selectPort = (options = {}) => options.port || process.env.PORT || 8080
+
 const create = (handler, options = {}) => {
-  const server = http.createServer((request, response) => {
-    request.context = {}
-    request.url = url.parse(request.url)
-    const method = request.method
-    if (method === 'POST') {
-      let body = ''
-      request.on('data', chunk => body += chunk.toString())
-      request.on('end', () => {
-        request.body = body
-        sendResponse(handler, request, response)
-      })
-    } else {
-      sendResponse(handler, request, response)
-    }
-  })
+  const server = http.createServer(handleRequests(handler))
   server.listen(selectPort(options))
   return server
 }
