@@ -14,7 +14,7 @@ describe('MilleFeuille', function() {
       const server = MilleFeuille.create(() => ({ statusCode: 200 }))
       const response = await fetch('http://localhost:8080')
       response.status.should.be.equal(200)
-      server.close()
+      MilleFeuille.stop(server)
     })
 
     it('should start on port designated by process.env.PORT if present', async function() {
@@ -22,7 +22,7 @@ describe('MilleFeuille', function() {
       const server = MilleFeuille.create(() => ({ statusCode: 200 }))
       const response = await fetch('http://localhost:3456')
       response.status.should.be.equal(200)
-      server.close()
+      MilleFeuille.stop(server)
       delete process.env.PORT
     })
 
@@ -31,9 +31,9 @@ describe('MilleFeuille', function() {
       const server = MilleFeuille.create(() => ({ statusCode: 200 }), { port: 4567 })
       const response = await fetch('http://localhost:4567')
       response.status.should.be.equal(200)
-      server.close()
+      MilleFeuille.stop(server)
       delete process.env.PORT
-    })    
+    })
   })
 
   context('When giving direct responses', function() {
@@ -41,14 +41,14 @@ describe('MilleFeuille', function() {
       const server = createMilleFeuille(() => ({ statusCode: 200 }))
       const response = await fetch(ENDPOINT)
       response.status.should.be.equal(200)
-      server.close()
+      MilleFeuille.stop(server)
     })
 
     it('should return a 500 error if incorrect responses', async function() {
       const server = createMilleFeuille(() => 'Ok')
       const response = await fetch(ENDPOINT)
       response.status.should.be.equal(500)
-      server.close()
+      MilleFeuille.stop(server)
     })
   })
 
@@ -57,14 +57,14 @@ describe('MilleFeuille', function() {
       const server = createMilleFeuille(() => Promise.resolve({ statusCode: 200 }))
       const response = await fetch(ENDPOINT)
       response.status.should.be.equal(200)
-      server.close()
+      MilleFeuille.stop(server)
     })
 
     it('should return a 500 error if incorrect responses', async function() {
       const server = createMilleFeuille(() => Promise.resolve({}))
       const response = await fetch(ENDPOINT)
       response.status.should.be.equal(500)
-      server.close()
+      MilleFeuille.stop(server)
     })
   })
 
@@ -73,14 +73,14 @@ describe('MilleFeuille', function() {
       const server = createMilleFeuille(() => Promise.reject('Error'))
       const response = await fetch(ENDPOINT)
       response.status.should.be.equal(500)
-      server.close()
+      MilleFeuille.stop(server)
     })
 
     it('should handle failure with proper statusCode', async function() {
       const server = createMilleFeuille(() => Promise.reject({ statusCode: 403 }))
       const response = await fetch(ENDPOINT)
       response.status.should.be.equal(403)
-      server.close()
+      MilleFeuille.stop(server)
     })
   })
 })
