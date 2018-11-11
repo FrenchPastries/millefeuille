@@ -12,6 +12,7 @@
     "test": "mocha",
     "coverage": "nyc --reporter=html mocha "
   },
+  "keywords": [ "server", "functional-programming" ],
   "dependencies": {},
   "devDependencies": {
     "chai": "^4.2.0",
