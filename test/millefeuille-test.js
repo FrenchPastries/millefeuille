@@ -83,4 +83,75 @@ describe('MilleFeuille', function() {
       MilleFeuille.stop(server)
     })
   })
+
+  context('In requests', function() {
+    it('should parse the URL in the url field', async function() {
+      const server = createMilleFeuille(request => {
+        request.url.should.exist
+        return { statusCode: 200 }
+      })
+      const response = await fetch(`${ENDPOINT}?test=test`)
+      response.status.should.be.equal(200)
+      MilleFeuille.stop(server)
+    })
+
+    it('should read the body in post requests', async function() {
+      const server = createMilleFeuille(request => {
+        JSON.parse(request.body).should.deep.equal({ test: 'test' })
+        return { statusCode: 200 }
+      })
+      const response = await fetch(ENDPOINT, {
+        method: 'POST',
+        body: JSON.stringify({ test: 'test' })
+      })
+      response.status.should.be.equal(200)
+      MilleFeuille.stop(server)
+    })
+
+    it('should be headers', async function() {
+      const server = createMilleFeuille(request => {
+        request.headers.should.contain.key('content-type')
+        return { statusCode: 200 }
+      })
+      const response = await fetch(ENDPOINT, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      response.status.should.be.equal(200)
+      MilleFeuille.stop(server)
+    })
+  })
+
+  context('In responses', function() {
+    it('should be able to add headers', async function() {
+      const server = createMilleFeuille(() => {
+        return {
+          statusCode: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept-Encoding': 'gzip'
+          },
+          body: 'Ok'
+        }
+      })
+      const response = await fetch(ENDPOINT)
+      const contentType = response.headers.get('content-type')
+      const acceptEncoding = response.headers.get('accept-encoding')
+      contentType.should.be.equal('application/json')
+      acceptEncoding.should.be.equal('gzip')
+      response.status.should.be.equal(200)
+      MilleFeuille.stop(server)
+    })
+  })
+
+  it('should be able to return body', async function() {
+    const server = createMilleFeuille(() => ({
+      statusCode: 200,
+      body: 'Ok'
+    }))
+    const response = await fetch(ENDPOINT)
+    const body = await response.text()
+    body.should.be.equal('Ok')
+    response.status.should.be.equal(200)
+    MilleFeuille.stop(server)
+  })
 })
