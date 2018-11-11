@@ -9,6 +9,33 @@ const ENDPOINT = `http://localhost:${PORT}`
 const createMilleFeuille = handler => MilleFeuille.create(handler, { port: PORT })
 
 describe('MilleFeuille', function() {
+  context('During creation', function() {
+    it('should start on port 8080 by default', async function() {
+      const server = MilleFeuille.create(() => ({ statusCode: 200 }))
+      const response = await fetch('http://localhost:8080')
+      response.status.should.be.equal(200)
+      server.close()
+    })
+
+    it('should start on port designated by process.env.PORT if present', async function() {
+      process.env.PORT = 3456
+      const server = MilleFeuille.create(() => ({ statusCode: 200 }))
+      const response = await fetch('http://localhost:3456')
+      response.status.should.be.equal(200)
+      server.close()
+      delete process.env.PORT
+    })
+
+    it('should start on the port given in options if present (even if process.env.PORT is set)', async function() {
+      process.env.PORT = 3456
+      const server = MilleFeuille.create(() => ({ statusCode: 200 }), { port: 4567 })
+      const response = await fetch('http://localhost:4567')
+      response.status.should.be.equal(200)
+      server.close()
+      delete process.env.PORT
+    })    
+  })
+
   context('When giving direct responses', function() {
     it('should properly handle correct responses', async function() {
       const server = createMilleFeuille(() => ({ statusCode: 200 }))
