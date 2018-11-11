@@ -141,17 +141,17 @@ describe('MilleFeuille', function() {
       response.status.should.be.equal(200)
       MilleFeuille.stop(server)
     })
-  })
 
-  it('should be able to return body', async function() {
-    const server = createMilleFeuille(() => ({
-      statusCode: 200,
-      body: 'Ok'
-    }))
-    const response = await fetch(ENDPOINT)
-    const body = await response.text()
-    body.should.be.equal('Ok')
-    response.status.should.be.equal(200)
-    MilleFeuille.stop(server)
+    it('should be able to return body', async function() {
+      const server = createMilleFeuille(() => ({
+        statusCode: 200,
+        body: 'Ok'
+      }))
+      const response = await fetch(ENDPOINT)
+      const body = await response.text()
+      body.should.be.equal('Ok')
+      response.status.should.be.equal(200)
+      MilleFeuille.stop(server)
+    })
   })
 })
