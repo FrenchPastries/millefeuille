@@ -142,6 +142,10 @@ You know practically everything you need to use MilleFeuille! One last thing tho
 
 The request URL is parsed for you with `url.parse` provided by Node. It is available in the `request.url` field.
 
+# Open Design Discussion
+
+We want to maintain as much as possible discussions in PR and issues open to anyone. We think it's important to share why we're doing things and to discuss about how you use the framework and how you would like to use it!
+
 # Contributing
 
 You love MilleFeuille? Feel free to contribute: open issues or propose pull requests! At French Pastries, we love hearing from you!
