@@ -138,7 +138,9 @@ To simply set a `PORT` environment variable, you can use `dotenv` to load a `.en
 
 # Last details
 
-You know practically everything you need to use MilleFeuille! One last thing though. The response provided by handlers is an object with `statusCode`, `headers` and `body` keys. But you can omit `headers` and `body` safely, MilleFeuille is able to handle it without errors: if they're present, they will be used. If they're not present, then MilleFeuille will just respond to requests without headers or body.
+You know practically everything you need to use MilleFeuille! One last thing though. The response provided by handlers is an object with `statusCode`, `headers` and `body` keys. But you can omit `headers` and `body` safely, MilleFeuille is able to handle it without errors: if they're present, they will be used. If they're not present, then MilleFeuille will just respond to requests without headers or body. If `statusCode` is not present, MilleFeuille will consider the request as an internal server error. If the response is made of a string, then it is an internal server error, with the corresponding string as body.
+
+The request URL is parsed for you with `url.parse` provided by Node. It is available in the `request.url` field.
 
 # Contributing
 
