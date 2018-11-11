@@ -1,7 +1,7 @@
 const response = body => ({
   statusCode: 200,
   headers: {},
-  body: body
+  body
 })
 
 const contentType = (response, type) => ({
@@ -24,7 +24,8 @@ const redirect = url => ({
 const badRequest = body => ({
   statusCode: 400,
   headers: {},
-  body: body
+  body
+})
 })
 
 const internalError = body => ({
