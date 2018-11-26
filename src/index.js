@@ -3,7 +3,7 @@ const url = require('url')
 
 const utils = require('./response')
 
-const setURL = request => request.url = url.parse(request.url)
+const setURL = request => request.url = url.parse(request.url, true)
 
 const extractBody = request => new Promise(resolve => {
   let body = ''
