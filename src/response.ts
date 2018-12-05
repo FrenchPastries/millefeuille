@@ -1,10 +1,12 @@
-const response = body => ({
+import { Response } from './types'
+
+const response = <T>(body: T) => ({
   statusCode: 200,
   headers: {},
   body
 })
 
-const contentType = (response, type) => ({
+const contentType = <T>(response: Response<T>, type: string) => ({
   statusCode: response.statusCode,
   headers: {
     ...response.headers,
@@ -13,7 +15,7 @@ const contentType = (response, type) => ({
   body: response.body
 })
 
-const redirect = url => ({
+const redirect = (url: string) => ({
   statusCode: 302,
   headers: {
     'Location': url
@@ -21,25 +23,25 @@ const redirect = url => ({
   body: ''
 })
 
-const badRequest = body => ({
+const badRequest = <T>(body: T) => ({
   statusCode: 400,
   headers: {},
   body
 })
 
-const forbidden = body => ({
+const forbidden = <T>(body: T) => ({
   statusCode: 403,
   headers: {},
   body
 })
 
-const internalError = body => ({
+const internalError = <T>(body: T) => ({
   statusCode: 500,
   headers: {},
   body: body
 })
 
-module.exports = {
+export {
   response,
   contentType,
   redirect,
