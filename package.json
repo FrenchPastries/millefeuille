@@ -2,6 +2,7 @@
   "name": "@frenchpastries/millefeuille",
   "version": "0.1.6",
   "main": "src/index.js",
+  "types": "src/index.d.ts",
   "repository": "https://github.com/FrenchPastries/millefeuille",
   "author": "Guillaume Hivert <guillaume.hivert@outlook.com>",
   "license": "MIT",
@@ -18,6 +19,7 @@
   ],
   "dependencies": {},
   "devDependencies": {
+    "@types/node": "^10.12.12",
     "chai": "^4.2.0",
     "eslint": "^5.7.0",
     "generate-export-aliases": "^1.1.0",
