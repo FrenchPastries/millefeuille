@@ -1,0 +1,13 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "lib": [ "es6" ],
+    "target": "ES2017",
+    "types": [ "node" ],
+    "typesRoot": [ "node_modules/@types" ],
+    "noImplicitAny": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "strictNullChecks": true
+  }
+}
