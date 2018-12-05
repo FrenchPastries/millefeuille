@@ -1,13 +1,19 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
+    "declaration": true,
     "lib": [ "es6" ],
     "target": "ES2017",
     "types": [ "node" ],
-    "typesRoot": [ "node_modules/@types" ],
     "noImplicitAny": true,
     "removeComments": true,
     "sourceMap": true,
-    "strictNullChecks": true
-  }
+    "strictNullChecks": true,
+    "outDir": "dist",
+    "esModuleInterop": true
+  },
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

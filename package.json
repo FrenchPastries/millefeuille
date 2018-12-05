@@ -11,15 +11,18 @@
     "dev": "SERVER_ENV=development nodemon src/index.js",
     "prepare": "generate-export-aliases",
     "test": "mocha",
-    "coverage": "nyc --reporter=html mocha "
+    "coverage": "nyc --reporter=html mocha ",
+    "build": "tsc"
   },
   "keywords": [
     "server",
     "functional-programming"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "typescript": "^3.2.1",
+    "@types/node": "^10.12.12"
+  },
   "devDependencies": {
-    "@types/node": "^10.12.12",
     "chai": "^4.2.0",
     "eslint": "^5.7.0",
     "generate-export-aliases": "^1.1.0",
@@ -30,11 +33,11 @@
   },
   "config": {
     "exportAliases": {
-      "response": "./src/response.js"
+      "response": "./dist/response.js"
     }
   },
   "files": [
-    "/src",
+    "/dist",
     "/response.js"
   ]
 }

@@ -1,5 +1,6 @@
 # Aliases for module
 /response.js
+dist/
 
 # JS Stuff
 node_modules/
