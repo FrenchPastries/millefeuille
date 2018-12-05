@@ -57,7 +57,7 @@ const handleRequests = handler => (request, response) => {
   }
 }
 
-const selectPort = (options = {}) => options.port || process.env.PORT || 8080
+const selectPort = ({ port }) => port || process.env.PORT || 8080
 
 const create = (handler, options = {}) => {
   const server = http.createServer(handleRequests(handler))
