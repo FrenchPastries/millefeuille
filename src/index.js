@@ -23,7 +23,7 @@ const normalizeResponse = content => {
     return {
       statusCode: content.statusCode || 500,
       headers: content.headers || {},
-      body: content.body || internalErrorMessage
+      body: content.body || (content.statusCode ? undefined : internalErrorMessage)
     }
   }
 }

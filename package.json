@@ -10,7 +10,7 @@
     "dev": "SERVER_ENV=development nodemon src/index.js",
     "prepare": "generate-export-aliases",
     "test": "mocha",
-    "coverage": "nyc --reporter=html mocha "
+    "coverage": "nyc --reporter=html mocha"
   },
   "keywords": [
     "server",
