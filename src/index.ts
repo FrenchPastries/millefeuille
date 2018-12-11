@@ -1,14 +1,32 @@
+import { IncomingHttpHeaders } from 'http'
+import { Socket } from 'net'
+import { UrlWithParsedQuery } from 'url'
 import * as http from 'http'
 import * as url from 'url'
 
-import {
-  Headers,
-  Options,
-  Request,
-  Response,
-  Handler
-} from './types'
+import { Response, Headers } from './response'
 import * as utils from './response'
+
+interface Options {
+  port?: number
+}
+
+interface Request {
+  method?: string
+  headers: IncomingHttpHeaders
+  connection: Socket
+  url?: UrlWithParsedQuery
+  body?: string
+  statusCode?: number
+  statusMessage?: string
+  socket: Socket
+}
+
+type Handler<Content> = (request: Request) => Response<Content> | Promise<Response<Content>>
+
+type Middleware<Input, Output> = (handler: Handler<Input>) => (request: Request) => Handler<Output>
+
+type Server = http.Server
 
 const createRequest = (request: http.IncomingMessage): Request => ({
   method: request.method,
@@ -77,16 +95,22 @@ const handleRequests = (handler: Handler<string>) => (serverRequest: http.Incomi
 
 const selectPort = (options: Options = {}) => options.port || process.env.PORT || 8080
 
-const create = (handler: Handler<string>, options = {}): http.Server => {
+const create = (handler: Handler<string>, options = {}): Server => {
   const server = http.createServer(handleRequests(handler))
   server.listen(selectPort(options))
   return server
 }
 
-const stop = (server: http.Server): http.Server => server.close()
+const stop = (server: Server): Server => server.close()
 
-export * from './types'
 export {
+  Server,
+  Handler,
+  Middleware,
+  Request,
+  Response,
+  Headers,
+  Options,
   create,
   stop
 }

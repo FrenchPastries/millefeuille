@@ -1,4 +1,12 @@
-import { Response } from './types'
+interface Headers {
+  [key: string]: string
+}
+
+interface Response<Content> {
+  statusCode?: number
+  headers?: Headers
+  body?: Content
+}
 
 const response = <Content>(body: Content): Response<Content> => ({
   statusCode: 200,
@@ -42,6 +50,8 @@ const internalError = <Content>(body: Content): Response<Content> => ({
 })
 
 export {
+  Response,
+  Headers,
   response,
   contentType,
   redirect,
