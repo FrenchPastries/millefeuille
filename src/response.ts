@@ -18,7 +18,7 @@ const contentType = <Content>(response: Response<Content>, type: string): Respon
   statusCode: response.statusCode,
   headers: {
     ...response.headers,
-    'Content-Contentype': type
+    'Content-Type': type
   },
   body: response.body
 })

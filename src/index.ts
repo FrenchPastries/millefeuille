@@ -58,7 +58,7 @@ const normalizeResponse = (content: string | Response<string>) => {
   if (typeof content === 'string') {
     return normalizeResponseHelp(utils.internalError(content))
   } else {
-    return normalizeResponseHelp({})
+    return normalizeResponseHelp(content)
   }
 }
 

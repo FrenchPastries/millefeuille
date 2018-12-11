@@ -1,7 +1,7 @@
 const should = require('chai').should() // eslint-disable-line
 const fetch = require('node-fetch')
 
-const util = require('../src/response')
+const util = require('../dist/response')
 
 describe('Response utility', function() {
   specify('response should be correct response', function() {
