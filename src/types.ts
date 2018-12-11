@@ -21,15 +21,19 @@ interface Request {
   socket: Socket
 }
 
-interface Response<T> {
+interface Response<Content> {
   statusCode?: number
   headers?: Headers
-  body?: T
+  body?: Content
 }
 
-type Handler<T> = (request: Request) => Response<T> | Promise<Response<T>>
+type HandlerReturn<Content>
+  = Response<Content>
+  | Promise<Response<Content>>
 
-type Middleware<T> = (handler: Handler<T>) => (request: Request) => Handler<T>
+type Handler<Content> = (request: Request) => HandlerReturn<Content>
+
+type Middleware<Input, Output> = (handler: Handler<Input>) => (request: Request) => Handler<Output>
 
 export {
   Headers,

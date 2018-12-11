@@ -1,5 +1,6 @@
 # Aliases for module
-/response.js
+/*.js
+/*.ts
 dist/
 
 # JS Stuff

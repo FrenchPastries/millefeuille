@@ -1,14 +1,12 @@
 import * as http from 'http'
 import * as url from 'url'
-import * as net from 'net'
 
 import {
   Headers,
   Options,
   Request,
   Response,
-  Handler,
-  Middleware
+  Handler
 } from './types'
 import * as utils from './response'
 
@@ -32,15 +30,17 @@ const extractBody = (request: http.IncomingMessage): Promise<string> => new Prom
 
 const internalErrorMessage = 'Internal Server Error. Please, contact your administrator.'
 
+const normalizeResponseHelp = (content: Response<string>) => ({
+  statusCode: content.statusCode || 500,
+  headers: content.headers || {},
+  body: content.body || internalErrorMessage
+})
+
 const normalizeResponse = (content: string | Response<string>) => {
   if (typeof content === 'string') {
-    return utils.internalError(content)
+    return normalizeResponseHelp(utils.internalError(content))
   } else {
-    return {
-      statusCode: content.statusCode || 500,
-      headers: content.headers || {},
-      body: content.body || internalErrorMessage
-    }
+    return normalizeResponseHelp({})
   }
 }
 
@@ -85,7 +85,8 @@ const create = (handler: Handler<string>, options = {}): http.Server => {
 
 const stop = (server: http.Server): http.Server => server.close()
 
-module.exports = {
+export * from './types'
+export {
   create,
   stop
 }
