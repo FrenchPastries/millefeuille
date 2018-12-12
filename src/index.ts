@@ -93,9 +93,9 @@ const handleRequests = (handler: Handler<string>) => (serverRequest: http.Incomi
   }
 }
 
-const selectPort = (options: Options = {}) => options.port || process.env.PORT || 8080
+const selectPort = ({ port }: Options) => port || process.env.PORT || 8080
 
-const create = (handler: Handler<string>, options = {}): Server => {
+const create = (handler: Handler<string>, options: Options = {}): Server => {
   const server = http.createServer(handleRequests(handler))
   server.listen(selectPort(options))
   return server
