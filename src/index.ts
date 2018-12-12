@@ -51,7 +51,7 @@ const internalErrorMessage = 'Internal Server Error. Please, contact your admini
 const normalizeResponseHelp = (content: Response<string>) => ({
   statusCode: content.statusCode || 500,
   headers: content.headers || {},
-  body: content.body || internalErrorMessage
+  body: content.body || (content.statusCode ? undefined : internalErrorMessage)
 })
 
 const normalizeResponse = (content: string | Response<string>) => {
