@@ -9,7 +9,7 @@
   "scripts": {
     "prepare": "yarn build",
     "test": "yarn build && mocha",
-    "coverage": "yarn build && nyc --reporter=html mocha ",
+    "coverage": "yarn build && nyc --reporter=html mocha",
     "build": "tsc"
   },
   "keywords": [
