@@ -71,7 +71,9 @@ const sendResponse = (serverResponse: http.ServerResponse) => (response: Respons
   const { statusCode, headers, body } = normalizeResponse(response)
   serverResponse.statusCode = statusCode
   setHeaders(serverResponse, headers)
-  serverResponse.write(body)
+  if (body) {
+    serverResponse.write(body)
+  }
   serverResponse.end()
 }
 
