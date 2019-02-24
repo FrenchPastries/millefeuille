@@ -17,15 +17,15 @@ const extractBody = request => new Promise(resolve => {
   })
 })
 
-const internalErrorMessage = 'Internal Server Error. Please, contact your administrator.'
-
 const normalizeResponse = content => {
   if (typeof content === 'object') {
+    const isError = content instanceof Error
     return {
       statusCode: content.statusCode || 500,
       headers: content.headers || {},
       body: content.body || (content.statusCode ? undefined : errorPage({
-        message: internalErrorMessage
+        message: isError ? content.message : JSON.stringify(content),
+        stackTrace: isError ? content.stack : undefined
       }))
     }
   } else {
