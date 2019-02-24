@@ -17,6 +17,7 @@
     "functional-programming"
   ],
   "dependencies": {
+    "chalk": "^2.4.2",
     "handlebars": "^4.1.0"
   },
   "devDependencies": {
