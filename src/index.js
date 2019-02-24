@@ -21,12 +21,13 @@ const internalErrorMessage = 'Internal Server Error. Please, contact your admini
 const normalizeResponse = content => {
   if (typeof content === 'string') {
     return utils.internalError(content)
-  } else {
+  } else if (typeof content === 'object') {
     return {
       statusCode: content.statusCode || 500,
       headers: content.headers || {},
-      body: content.body || (content.statusCode ? undefined : internalErrorMessage)
     }
+  } else {
+    return utils.internalError(JSON.stringify(content))
   }
 }
 
