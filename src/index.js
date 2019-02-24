@@ -36,18 +36,33 @@ const setHeaders = (response, headers) => {
   Object.keys(headers).forEach(setHeader)
 }
 
-const sendResponse = response => content => {
-  const { statusCode, headers, body } = normalizeResponse(content)
+const sendResponse = (response, content) => {
+  const { statusCode, headers, body } = content
   response.statusCode = statusCode
   setHeaders(response, headers)
   response.write(body)
   response.end()
 }
 
+const normalizeError = error => {
+  if (error instanceof Error) {
+    if (isDev) {
+      console.error(error)
+    }
+    return {
+      statusCode: 500,
+      headers: {},
+      body: error.stack,
+    }
+  } else {
+    return normalizeResponse(error)
+  }
+}
+
 const handleResponse = (handler, request, response) => {
   Promise.resolve(handler(request))
-    .then(sendResponse(response))
-    .catch(sendResponse(response))
+    .then(content => sendResponse(response, normalizeResponse(content)))
+    .catch(error => sendResponse(response, normalizeError(error)))
 }
 
 const handleRequests = handler => (request, response) => {
