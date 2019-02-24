@@ -2,6 +2,7 @@ const http = require('http')
 const url = require('url')
 
 const utils = require('./response')
+const errorPage = require('./error-page')
 
 const setURL = request => request.url = url.parse(request.url, true)
 
@@ -19,15 +20,20 @@ const extractBody = request => new Promise(resolve => {
 const internalErrorMessage = 'Internal Server Error. Please, contact your administrator.'
 
 const normalizeResponse = content => {
-  if (typeof content === 'string') {
-    return utils.internalError(content)
-  } else if (typeof content === 'object') {
+  if (typeof content === 'object') {
     return {
       statusCode: content.statusCode || 500,
       headers: content.headers || {},
+      body: content.body || (content.statusCode ? undefined : errorPage({
+        message: internalErrorMessage
+      }))
     }
   } else {
-    return utils.internalError(JSON.stringify(content))
+    if (isDev) {
+      return utils.internalError(errorPage({ message: JSON.stringify(content) }))
+    } else {
+      return utils.internalError(JSON.stringify(content))
+    }
   }
 }
 
@@ -52,7 +58,10 @@ const normalizeError = error => {
     return {
       statusCode: 500,
       headers: {},
-      body: error.stack,
+      body: errorPage({
+        message: error.message,
+        stackTrace: error.stack,
+      }),
     }
   } else {
     return normalizeResponse(error)
