@@ -42,7 +42,7 @@ const setHeaders = (response, headers) => {
   Object.keys(headers).forEach(setHeader)
 }
 
-const sendResponse = (response, content) => {
+const sendResponse = response => content => {
   const { statusCode, headers, body } = content
   response.statusCode = statusCode
   setHeaders(response, headers)
@@ -70,8 +70,9 @@ const normalizeError = error => {
 
 const handleResponse = (handler, request, response) => {
   Promise.resolve(handler(request))
-    .then(content => sendResponse(response, normalizeResponse(content)))
-    .catch(error => sendResponse(response, normalizeError(error)))
+    .then(normalizeResponse)
+    .catch(normalizeError)
+    .then(sendResponse(response))
 }
 
 const handleRequests = handler => (request, response) => {
