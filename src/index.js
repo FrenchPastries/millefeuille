@@ -5,6 +5,8 @@ const utils = require('./response')
 
 const setURL = request => request.url = url.parse(request.url, true)
 
+const isDev = process.env.NODE_ENV !== 'production'
+
 const extractBody = request => new Promise(resolve => {
   let body = ''
   request.on('data', chunk => body += chunk.toString())
