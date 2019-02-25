@@ -18,16 +18,42 @@ const extractBody = request => new Promise(resolve => {
   })
 })
 
+const bodyOrErrorPage = content => {
+  if (content.body) {
+    if (content.statusCode) {
+      return content.body
+    } else {
+      if (isDev) {
+        return errorPage({
+          message: `The object you provided is:\n${JSON.stringify(content, null, 2)}`,
+        })
+      } else {
+        return 'Internal Server Error'
+      }
+    }
+  } else {
+    if (content.statusCode) {
+      return undefined
+    } else {
+      if (isDev) {
+        const isError = content instanceof Error
+        return errorPage({
+          message: isError ? content.message : JSON.stringify(content, null, 2),
+          stackTrace: isError ? content.stack : undefined
+        })
+      } else {
+        return 'Internal Server Error'
+      }
+    }
+  }
+}
+
 const normalizeResponse = content => {
   if (typeof content === 'object') {
-    const isError = content instanceof Error
     return {
       statusCode: content.statusCode || 500,
       headers: content.headers || {},
-      body: content.body || (content.statusCode ? undefined : errorPage({
-        message: isError ? content.message : JSON.stringify(content),
-        stackTrace: isError ? content.stack : undefined
-      }))
+      body: bodyOrErrorPage(content)
     }
   } else {
     if (isDev) {
