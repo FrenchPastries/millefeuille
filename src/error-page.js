@@ -4,7 +4,7 @@ const errorHBS = `<!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title>{{title}}</title>
+    <title>500 | Internal Server Error</title>
     <style media="screen">
       body {
         background-color: #fafafa;
