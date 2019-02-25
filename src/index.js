@@ -1,5 +1,6 @@
 const http = require('http')
 const url = require('url')
+const chalk = require('chalk')
 
 const utils = require('./response')
 const errorPage = require('./error-page')
@@ -53,7 +54,7 @@ const sendResponse = response => content => {
 const normalizeError = error => {
   if (error instanceof Error) {
     if (isDev) {
-      console.error(error)
+      console.error(chalk.bold.red(error.stack))
     }
     return {
       statusCode: 500,
