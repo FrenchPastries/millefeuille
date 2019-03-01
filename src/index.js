@@ -73,7 +73,7 @@ const sendResponse = response => content => {
   const { statusCode, headers, body } = content
   response.statusCode = statusCode
   setHeaders(response, headers)
-  response.write(body)
+  if (body) { response.write(body) }
   response.end()
 }
 
