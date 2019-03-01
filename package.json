@@ -16,7 +16,10 @@
     "server",
     "functional-programming"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "handlebars": "^4.1.0"
+  },
   "devDependencies": {
     "chai": "^4.2.0",
     "eslint": "^5.7.0",
