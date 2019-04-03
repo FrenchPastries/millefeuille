@@ -13,7 +13,9 @@ const extractBody = request => new Promise(resolve => {
   let body = ''
   request.on('data', chunk => body += chunk.toString())
   request.on('end', () => {
-    request.body = body
+    if (body !== '') {
+      request.body = body
+    }
     resolve(request)
   })
 })
