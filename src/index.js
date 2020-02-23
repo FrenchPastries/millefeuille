@@ -104,14 +104,10 @@ const handleResponse = (handler, request, response) => {
     .then(sendResponse(response))
 }
 
-const handleRequests = handler => (request, response) => {
+const handleRequests = handler => async (request, response) => {
   setURL(request)
-  if (request.method === 'POST') {
-    extractBody(request)
-      .then(() => handleResponse(handler, request, response))
-  } else {
-    handleResponse(handler, request, response)
-  }
+  await extractBody(request)
+  handleResponse(handler, request, response)
 }
 
 const selectPort = ({ port }) => port || process.env.PORT || 8080
