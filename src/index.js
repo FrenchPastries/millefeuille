@@ -20,15 +20,18 @@ const extractBody = request => new Promise(resolve => {
   })
 })
 
-const bodyOrErrorPage = content => {
+const bodyOrErrorPage = (headers, content) => {
   if (content.body) {
     if (content.statusCode) {
       return content.body
     } else {
       if (isDev) {
-        return errorPage({
-          message: `The object you provided is:\n${JSON.stringify(content, null, 2)}`,
-        })
+        const message = `The object you provided is:\n${JSON.stringify(content, null, 2)}`
+        if (headers.accept.includes('text/html')) {
+          return errorPage({ message })
+        } else {
+          return message
+        }
       } else {
         return 'Internal Server Error'
       }
@@ -39,10 +42,15 @@ const bodyOrErrorPage = content => {
     } else {
       if (isDev) {
         const isError = content instanceof Error
-        return errorPage({
+        const toSend = {
           message: isError ? content.message : JSON.stringify(content, null, 2),
           stackTrace: isError ? content.stack : undefined
-        })
+        }
+        if (headers.accept.includes('text/html')) {
+          return errorPage(toSend)
+        } else {
+          return JSON.stringify(toSend)
+        }
       } else {
         return 'Internal Server Error'
       }
@@ -50,12 +58,12 @@ const bodyOrErrorPage = content => {
   }
 }
 
-const normalizeResponse = content => {
+const normalizeResponse = headers => content => {
   if (typeof content === 'object') {
     return {
       statusCode: content.statusCode || 500,
       headers: content.headers || {},
-      body: bodyOrErrorPage(content)
+      body: bodyOrErrorPage(headers, content)
     }
   } else {
     if (isDev) {
@@ -79,28 +87,29 @@ const sendResponse = response => content => {
   response.end()
 }
 
-const normalizeError = error => {
+const normalizeError = headers => error => {
   if (error instanceof Error) {
     if (isDev) {
       console.error(chalk.bold.red(error.stack))
     }
+    const toSend = {
+      message: error.message,
+      stackTrace: error.stack,
+    }
     return {
       statusCode: 500,
       headers: {},
-      body: errorPage({
-        message: error.message,
-        stackTrace: error.stack,
-      }),
+      body: headers.accept.includes('text/html') ? errorPage(toSend) : JSON.stringify(toSend),
     }
   } else {
-    return normalizeResponse(error)
+    return normalizeResponse(headers)(error)
   }
 }
 
 const handleResponse = (handler, request, response) => {
   Promise.resolve(handler(request))
-    .then(normalizeResponse)
-    .catch(normalizeError)
+    .then(normalizeResponse(request.headers))
+    .catch(normalizeError(request.headers))
     .then(sendResponse(response))
 }
 
