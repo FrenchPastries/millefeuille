@@ -1,6 +1,7 @@
 const { compile } = require('handlebars')
+const helpers = require('./helpers')
 
-const errorHBS = `<!DOCTYPE html>
+const render = compile(`<!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
@@ -169,6 +170,18 @@ const errorHBS = `<!DOCTYPE html>
     </main>
   </body>
 </html>
-`
+`)
 
-module.exports = compile(errorHBS)
+const fixFormat = (headers, error) => {
+  const toSend = helpers.errorPage.fromError(error)
+  if (headers.accept.includes('text/html')) {
+    return render(toSend)
+  } else {
+    return JSON.stringify(toSend)
+  }
+}
+
+module.exports = {
+  fixFormat,
+  render,
+}

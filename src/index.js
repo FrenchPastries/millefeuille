@@ -1,60 +1,45 @@
 const http = require('http')
-const url = require('url')
-const chalk = require('chalk')
 
-const utils = require('./response')
+const response = require('./response')
 const errorPage = require('./error-page')
+const helpers = require('./helpers')
+const logger = require('./logger')
 
-const setURL = request => request.url = url.parse(request.url, true)
+const renderError = (headers, content) => {
+  const jsonContent = JSON.stringify(content, null, 2)
+  const message = `The object you provided is:\n${jsonContent}`
+  if (headers.accept.includes('text/html')) {
+    return errorPage.render({ message })
+  } else {
+    return message
+  }
+}
 
-const isDev = process.env.NODE_ENV !== 'production'
+const renderErrorEmptyBody = (headers, content) => {
+  const toSend = helpers.errorPage.fromContent(content)
+  if (headers.accept.includes('text/html')) {
+    return errorPage.render(toSend)
+  } else {
+    return JSON.stringify(toSend)
+  }
+}
 
-const extractBody = request => new Promise(resolve => {
-  let body = ''
-  request.on('data', chunk => body += chunk.toString())
-  request.on('end', () => {
-    if (body !== '') {
-      request.body = body
-    }
-    resolve(request)
-  })
-})
+const renderBodyOrError = (headers, content) => (body, errorRenderer) => {
+  if (content.statusCode) {
+    return body
+  } else if (helpers.config.isDev) {
+    return errorRenderer(headers, content)
+  } else {
+    return 'Internal Server Error'
+  }
+}
 
 const bodyOrErrorPage = (headers, content) => {
+  const renderer = renderBodyOrError(headers, content)
   if (content.body) {
-    if (content.statusCode) {
-      return content.body
-    } else {
-      if (isDev) {
-        const message = `The object you provided is:\n${JSON.stringify(content, null, 2)}`
-        if (headers.accept.includes('text/html')) {
-          return errorPage({ message })
-        } else {
-          return message
-        }
-      } else {
-        return 'Internal Server Error'
-      }
-    }
+    return renderer(content.body, renderError)
   } else {
-    if (content.statusCode) {
-      return undefined
-    } else {
-      if (isDev) {
-        const isError = content instanceof Error
-        const toSend = {
-          message: isError ? content.message : JSON.stringify(content, null, 2),
-          stackTrace: isError ? content.stack : undefined
-        }
-        if (headers.accept.includes('text/html')) {
-          return errorPage(toSend)
-        } else {
-          return JSON.stringify(toSend)
-        }
-      } else {
-        return 'Internal Server Error'
-      }
-    }
+    return renderer(undefined, renderErrorEmptyBody)
   }
 }
 
@@ -63,60 +48,50 @@ const normalizeResponse = headers => content => {
     return {
       statusCode: content.statusCode || 500,
       headers: content.headers || {},
-      body: bodyOrErrorPage(headers, content)
+      body: bodyOrErrorPage(headers, content),
     }
   } else {
-    if (isDev) {
-      return utils.internalError(errorPage({ message: JSON.stringify(content) }))
+    const message = JSON.stringify(content)
+    if (helpers.config.isDev) {
+      const fullErrorPage = errorPage.render({ message })
+      return response.internalError(fullErrorPage)
     } else {
-      return utils.internalError(JSON.stringify(content))
+      return response.internalError(message)
     }
   }
-}
-
-const setHeaders = (response, headers) => {
-  const setHeader = key => response.setHeader(key, headers[key])
-  Object.keys(headers).forEach(setHeader)
 }
 
 const sendResponse = response => content => {
   const { statusCode, headers, body } = content
   response.statusCode = statusCode
-  setHeaders(response, headers)
-  if (body) { response.write(body) }
+  helpers.requests.setHeaders(response, headers)
+  if (body) {
+    response.write(body)
+  }
   response.end()
 }
 
 const normalizeError = headers => error => {
   if (error instanceof Error) {
-    if (isDev) {
-      console.error(chalk.bold.red(error.stack))
-    }
-    const toSend = {
-      message: error.message,
-      stackTrace: error.stack,
-    }
-    return {
-      statusCode: 500,
-      headers: {},
-      body: headers.accept.includes('text/html') ? errorPage(toSend) : JSON.stringify(toSend),
-    }
+    logger.stacktrace(error)
+    const body = errorPage.fixFormat(headers, error)
+    return { statusCode: 500, headers: {}, body }
   } else {
     return normalizeResponse(headers)(error)
   }
 }
 
 const handleResponse = (handler, request, response) => {
-  Promise.resolve(handler(request))
+  return Promise.resolve(handler(request))
     .then(normalizeResponse(request.headers))
     .catch(normalizeError(request.headers))
     .then(sendResponse(response))
 }
 
 const handleRequests = handler => async (request, response) => {
-  setURL(request)
-  await extractBody(request)
-  handleResponse(handler, request, response)
+  helpers.requests.setURL(request)
+  await helpers.requests.extractBody(request)
+  await handleResponse(handler, request, response)
 }
 
 const selectPort = ({ port }) => port || process.env.PORT || 8080
@@ -131,5 +106,5 @@ const stop = server => server.close()
 
 module.exports = {
   create,
-  stop
+  stop,
 }
