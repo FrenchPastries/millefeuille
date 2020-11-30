@@ -1,9 +1,8 @@
-const chalk = require('chalk')
 const helpers = require('./helpers')
 
 const stacktrace = error => {
   if (helpers.config.isDev) {
-    console.error(chalk.bold.red(error.stack))
+    console.error(`\x1B[1;31m${error.stack.toString()}\x1B[0m`)
   }
 }
 
