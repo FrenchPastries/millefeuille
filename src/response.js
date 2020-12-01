@@ -1,43 +1,21 @@
-const response = body => ({
-  statusCode: 200,
-  headers: {},
-  body
-})
+const createResponse = (statusCode, headers, body) => {
+  return { statusCode, headers, body }
+}
 
-const contentType = (response, type) => ({
-  statusCode: response.statusCode,
-  headers: {
-    ...response.headers,
-    'Content-Type': type
-  },
-  body: response.body
-})
+const contentType = ({ statusCode, headers, body }, type) => {
+  const newHeaders = { ...headers, 'Content-Type': type }
+  return createResponse(statusCode, newHeaders, body)
+}
 
-const redirect = url => ({
-  statusCode: 302,
-  headers: {
-    'Location': url
-  },
-  body: ''
-})
+const redirect = url => {
+  const headers = { Location: url }
+  return createResponse(302, headers, '')
+}
 
-const badRequest = body => ({
-  statusCode: 400,
-  headers: {},
-  body
-})
-
-const forbidden = body => ({
-  statusCode: 403,
-  headers: {},
-  body
-})
-
-const internalError = body => ({
-  statusCode: 500,
-  headers: {},
-  body: body
-})
+const response = body => createResponse(200, {}, body)
+const badRequest = body => createResponse(400, {}, body)
+const forbidden = body => createResponse(403, {}, body)
+const internalError = body => createResponse(500, {}, body)
 
 module.exports = {
   response,
@@ -45,5 +23,5 @@ module.exports = {
   redirect,
   badRequest,
   forbidden,
-  internalError
+  internalError,
 }
