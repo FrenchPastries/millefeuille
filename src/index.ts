@@ -5,6 +5,8 @@ import * as helpers from './helpers'
 import * as logger from './logger'
 import * as millefeuille from './types'
 
+export * from './types'
+
 export type Handler<Input, Output> =
   | ((request: Input) => Output)
   | ((request: Input) => Promise<Output>)
