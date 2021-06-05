@@ -39,6 +39,7 @@
   },
   "files": [
     "/dist",
+    "/response.d.ts",
     "/response.js"
   ]
 }

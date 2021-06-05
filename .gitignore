@@ -1,5 +1,7 @@
 # Aliases for module
 /*.js
+/*.d.ts
+
 dist/
 
 # JS Stuff
