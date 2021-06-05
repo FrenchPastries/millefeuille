@@ -1,7 +1,7 @@
 const should = require('chai').should() // eslint-disable-line
 const fetch = require('node-fetch')
 
-const MilleFeuille = require('../src/index')
+const MilleFeuille = require('../dist/index')
 
 const PORT = 12345
 const ENDPOINT = `http://localhost:${PORT}`

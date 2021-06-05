@@ -1,7 +1,13 @@
-const message = require('./message')
-const stacktrace = require('./stacktrace')
+import message from './message'
+import stacktrace from './stacktrace'
 
-const render = options => {
+export type Options = {
+  applicationName?: string
+  message?: string
+  stacktrace?: string
+}
+
+const render = (options: Options) => {
   return `<!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
@@ -128,9 +134,9 @@ const render = options => {
         </p>
       </div>
       <div class="spacer"></div>
-      ${options.message ? message(options) : ''}
+      ${options.message ? message(options.message) : ''}
       <div class="small-spacer"></div>
-      ${options.stacktrace ? stacktrace(options) : ''}
+      ${options.stacktrace ? stacktrace(options.stacktrace) : ''}
       <div class="spacer"></div>
       <h2>Response Object</h2>
       <p>
@@ -151,4 +157,4 @@ const render = options => {
 </html>`
 }
 
-module.exports = render
+export default render
