@@ -2,6 +2,7 @@ import * as http from 'http'
 
 export interface IncomingRequest extends http.IncomingMessage {
   body: string | Object | null
+  [key: string]: any
 }
 
 export type Headers = {
