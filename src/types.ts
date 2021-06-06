@@ -1,7 +1,7 @@
 import * as http from 'http'
 
 export interface IncomingRequest extends http.IncomingMessage {
-  body: string | Object | null
+  body: any
   [key: string]: any
 }
 
