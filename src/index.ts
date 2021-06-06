@@ -9,7 +9,9 @@ export * from './types'
 
 export type Handler<Input, Output> = (
   request: Input
-) => Output | Promise<Output>
+) =>
+  | millefeuille.ServerResponse<Output>
+  | Promise<millefeuille.ServerResponse<Output>>
 
 export type Options = {
   port?: number
@@ -103,8 +105,8 @@ const normalizeError = (headers: http.IncomingHttpHeaders) => {
 }
 
 const handleResponse = (
-  handler: Handler<http.IncomingMessage, any>,
-  request: http.IncomingMessage,
+  handler: Handler<millefeuille.IncomingRequest, any>,
+  request: millefeuille.IncomingRequest,
   response: http.ServerResponse
 ) => {
   return Promise.resolve(handler(request))
@@ -113,18 +115,20 @@ const handleResponse = (
     .then(sendResponse(response))
 }
 
-const handleRequests =
-  (handler: Handler<http.IncomingMessage, any>): http.RequestListener =>
-  async (request, response) => {
+const handleRequests = (
+  handler: Handler<millefeuille.IncomingRequest, any>
+): http.RequestListener => {
+  return async (request, response) => {
     helpers.requests.setURL(request)
-    await helpers.requests.extractBody(request)
-    await handleResponse(handler, request, response)
+    const newRequest = await helpers.requests.extractBody(request)
+    await handleResponse(handler, newRequest, response)
   }
+}
 
 const selectPort = ({ port }: Options) => port || process.env.PORT || 8080
 
 export const create = (
-  handler: Handler<http.IncomingMessage, any>,
+  handler: Handler<millefeuille.IncomingRequest, any>,
   options: Options = {}
 ) => {
   const server = http.createServer(handleRequests(handler))
