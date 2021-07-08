@@ -1,7 +1,9 @@
 import * as http from 'http'
+import * as url from 'url'
 
 export interface IncomingRequest extends http.IncomingMessage {
   body: any
+  location?: url.URL
   [key: string]: any
 }
 
@@ -11,6 +13,6 @@ export type Headers = {
 
 export type ServerResponse<Body> = {
   statusCode: number
-  headers: Headers
-  body: Body
+  headers?: Headers
+  body?: Body
 }

@@ -119,7 +119,7 @@ const handleRequests = (
   handler: Handler<millefeuille.IncomingRequest, any>
 ): http.RequestListener => {
   return async (request, response) => {
-    helpers.requests.setURL(request)
+    helpers.requests.setURL(request as millefeuille.IncomingRequest)
     const newRequest = await helpers.requests.extractBody(request)
     await handleResponse(handler, newRequest, response)
   }

@@ -2,17 +2,16 @@ import * as url from 'url'
 import * as http from 'http'
 import * as millefeuille from '../types'
 
-export const setURL = (request: http.IncomingMessage) => {
+export const setURL = (request: millefeuille.IncomingRequest) => {
   if (request.url) {
     const newUrl = new url.URL(request.url, 'http://0.0.0.0')
-    // @ts-ignore
-    request.url = newUrl
+    request.location = newUrl
   }
 }
 
 export const setHeaders = (
   response: http.ServerResponse,
-  headers: millefeuille.Headers
+  headers: millefeuille.Headers | undefined = {}
 ) => {
   Object.keys(headers).forEach(key => response.setHeader(key, headers[key]))
 }
