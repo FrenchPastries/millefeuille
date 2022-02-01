@@ -9,9 +9,7 @@ export * from './types'
 
 export type Handler<Input, Output> = (
   request: Input
-) =>
-  | millefeuille.ServerResponse<Output>
-  | Promise<millefeuille.ServerResponse<Output>>
+) => Promise<millefeuille.ServerResponse<Output>>
 
 export type Options = {
   port?: number
