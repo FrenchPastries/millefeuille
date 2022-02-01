@@ -1,8 +1,8 @@
 import * as http from 'http'
 import * as url from 'url'
 
-export interface IncomingRequest extends http.IncomingMessage {
-  body: any
+export interface IncomingRequest<Body = any> extends http.IncomingMessage {
+  body: Body
   location?: url.URL
   [key: string]: any
 }
